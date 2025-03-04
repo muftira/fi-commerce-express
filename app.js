@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
 const UserRoute = require('./routes/UserRoute')
 const ItemRoute = require('./routes/ItemRoute')
 const CartRoute = require('./routes/CartRoute')
@@ -8,6 +9,7 @@ const OrderRoute = require('./routes/OrderRoute')
 //get data in JSON format
 app.use(express.json()); // for parsing application/json
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+app.use(cors());
 
 //import routes
 app.use('/v1',UserRoute)

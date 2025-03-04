@@ -19,6 +19,7 @@
   "dependencies": {
     "bcrypt": "^5.1.0",
     "cloudinary": "^2.5.1",
+    "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "fastest-validator": "^1.16.0",
