@@ -21,5 +21,6 @@ router.delete(
   adminRole,
   userController.deleteUser
 );
+router.get("/useremail", userController.getUserEmail);
 
 module.exports = router;

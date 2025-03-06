@@ -97,9 +97,9 @@ class UserController {
       if (checkUser) {
         // validate Email
         if (checkUser.dataValues.email == email.toLowerCase()) {
-            if(req.file){
-                const deletedImageUpload = cloudinary.uploader.destroy(req.file.filename);
-              }
+          if (req.file) {
+            const deletedImageUpload = cloudinary.uploader.destroy(req.file.filename);
+          }
           throw new ErrorResponse(401, {}, "Email Already Exist");
         } else {
           // Validate Data
@@ -254,9 +254,9 @@ class UserController {
       if (checkUser) {
         // Validate Email
         if (checkUser.dataValues.email == email.toLowerCase()) {
-            if(req.file){
-              const deletedImageUpload = cloudinary.uploader.destroy(req.file.filename);
-            }
+          if (req.file) {
+            const deletedImageUpload = cloudinary.uploader.destroy(req.file.filename);
+          }
           throw new ErrorResponse(401, {}, "Email Already Exist");
         } else {
           // Validate Data
@@ -357,6 +357,22 @@ class UserController {
       });
       const result = await User.destroy({ where: { id } });
       return new SuccessResponse(res, 200, result, "Success");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getUserEmail(req, res, next) {
+    const { email } = req.query;
+    try {
+      const result = await User.findOne({
+        where: { email },
+        attributes: ['email']
+      });
+      if (!result) {
+        return new SuccessResponse(res, 200, result, "Email is not available");
+      }
+      throw new ErrorResponse(401, result, "Email is Available");
     } catch (error) {
       next(error);
     }
