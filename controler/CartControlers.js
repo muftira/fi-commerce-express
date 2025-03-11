@@ -1,6 +1,6 @@
-const { Cart, Cart_item, Item, User, sequelize } = require("../models");
-const { Op, fn } = require("sequelize");
-const SuccessResponse = require("../helpers/Success.helper");
+const { Cart, Cart_item, Item, User, sequelize } = require('../models');
+const { Op, fn } = require('sequelize');
+const SuccessResponse = require('../helpers/Success.helper');
 
 class CartController {
   async getCart(req, res, next) {
@@ -13,21 +13,21 @@ class CartController {
           },
           {
             model: Cart_item,
-            as: "ItemsProduct",
+            as: 'ItemsProduct',
             attributes: [
-              "id",
-              "itemId",
-              "cartId",
-              "quantity",
-              "createdAt",
-              "updatedAt",
+              'id',
+              'itemId',
+              'cartId',
+              'quantity',
+              'createdAt',
+              'updatedAt',
             ],
             include: Item,
           },
         ],
       });
 
-      return new SuccessResponse(res, 200, result, "Success");
+      return new SuccessResponse(res, 200, result, 'Success');
     } catch (error) {
       next(error);
     }
@@ -39,7 +39,7 @@ class CartController {
       const result = await Cart.findOne({
         where: { [Op.and]: [{ id }, { statusCart: false }] },
       });
-      return new SuccessResponse(res, 200, result, "Success");
+      return new SuccessResponse(res, 200, result, 'Success');
     } catch (error) {
       next(error);
     }
@@ -49,12 +49,12 @@ class CartController {
     try {
       const result = await Cart_item.findAll({
         attributes: [
-          "id",
-          "itemId",
-          "quantity",
-          "cartId",
-          "createdAt",
-          "updatedAt",
+          'id',
+          'itemId',
+          'quantity',
+          'cartId',
+          'createdAt',
+          'updatedAt',
         ],
         include: [
           {
@@ -65,7 +65,7 @@ class CartController {
           },
         ],
       });
-      return new SuccessResponse(res, 200, result, "Success");
+      return new SuccessResponse(res, 200, result, 'Success');
     } catch (error) {
       next(error);
     }
@@ -77,12 +77,12 @@ class CartController {
       const result = await Cart_item.findOne({
         where: { id },
         attributes: [
-          "id",
-          "itemId",
-          "cartId",
-          "quantity",
-          "createdAt",
-          "updatedAt",
+          'id',
+          'itemId',
+          'cartId',
+          'quantity',
+          'createdAt',
+          'updatedAt',
         ],
         include: [
           {
@@ -93,7 +93,7 @@ class CartController {
           },
         ],
       });
-      return new SuccessResponse(res, 200, result, "Success");
+      return new SuccessResponse(res, 200, result, 'Success');
     } catch (error) {
       next(error);
     }
@@ -111,7 +111,7 @@ class CartController {
         cartId: result1.id,
         quantity,
       });
-      return new SuccessResponse(res, 201, result1, "Success");
+      return new SuccessResponse(res, 201, result1, 'Success');
     } catch (error) {
       next(error);
     }
@@ -138,7 +138,7 @@ class CartController {
         where: { [Op.and]: [{ itemId }, { cartId }] },
       });
 
-      return new SuccessResponse(res, 201, result, "Success");
+      return new SuccessResponse(res, 201, result, 'Success');
     } catch (error) {
       next(error);
     }
@@ -153,7 +153,7 @@ class CartController {
         { quantityTotal, totalPrice },
         { where: { id } }
       );
-      return new SuccessResponse(res, 200, result, "Success");
+      return new SuccessResponse(res, 200, result, 'Success');
     } catch (error) {
       next(error);
     }
@@ -181,7 +181,7 @@ class CartController {
       const result = await Cart_item.findOne({
         where: { [Op.and]: [{ itemId }, { cartId }] },
       });
-      return new SuccessResponse(res, 200, result, "Success");
+      return new SuccessResponse(res, 200, result, 'Success');
     } catch (error) {
       next(error);
     }
@@ -192,7 +192,7 @@ class CartController {
     try {
       const { id } = req.params;
       const result = await Cart.destroy({ where: { id } });
-      return new SuccessResponse(res, 200, result, "Success");
+      return new SuccessResponse(res, 200, result, 'Success');
     } catch (error) {
       next(error);
     }

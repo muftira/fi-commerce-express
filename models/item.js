@@ -1,7 +1,5 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Item extends Model {
     /**
@@ -12,26 +10,34 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
 
-      Item.belongsTo(models.User, {foreignKey: "userId"})
-      Item.belongsTo(models.Category, {foreignKey: "categoryId"})
+      Item.belongsTo(models.User, { foreignKey: 'userId' });
+      Item.belongsTo(models.Category, { foreignKey: 'categoryId' });
 
       //super many to many
-      Item.belongsToMany(models.Cart, {through: models.Cart_item, foreignKey: "itemId"})
-      Item.hasMany(models.Cart_item, {as: "ItemsProduct", foreignKey:"itemId"})
-      Item.hasMany(models.ImageItem, {foreignKey:"itemId"})
-      
+      Item.belongsToMany(models.Cart, {
+        through: models.Cart_item,
+        foreignKey: 'itemId',
+      });
+      Item.hasMany(models.Cart_item, {
+        as: 'ItemsProduct',
+        foreignKey: 'itemId',
+      });
+      Item.hasMany(models.ImageItem, { foreignKey: 'itemId' });
     }
   }
-  Item.init({
-    userId: DataTypes.INTEGER,
-    productName: DataTypes.STRING,
-    price: DataTypes.DOUBLE,
-    categoryId: DataTypes.INTEGER,
-    size: DataTypes.STRING,
-    color: DataTypes.STRING,
-  }, {
-    sequelize,
-    modelName: 'Item',
-  });
+  Item.init(
+    {
+      userId: DataTypes.INTEGER,
+      productName: DataTypes.STRING,
+      price: DataTypes.DOUBLE,
+      categoryId: DataTypes.INTEGER,
+      size: DataTypes.STRING,
+      color: DataTypes.STRING,
+    },
+    {
+      sequelize,
+      modelName: 'Item',
+    }
+  );
   return Item;
 };

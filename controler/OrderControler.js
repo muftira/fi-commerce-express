@@ -1,5 +1,5 @@
-const { Order, Cart, Item, User } = require("../models");
-const SuccessResponse = require("../helpers/Success.helper");
+const { Order, Cart, Item, User } = require('../models');
+const SuccessResponse = require('../helpers/Success.helper');
 
 class OrderController {
   async getOrder(req, res, next) {
@@ -17,7 +17,7 @@ class OrderController {
           },
         ],
       });
-      return new SuccessResponse(res, 200, result, "Success");
+      return new SuccessResponse(res, 200, result, 'Success');
     } catch (error) {
       next(error);
     }
@@ -40,7 +40,7 @@ class OrderController {
           },
         ],
       });
-      return new SuccessResponse(res, 200, result, "Success");
+      return new SuccessResponse(res, 200, result, 'Success');
     } catch (error) {
       next(error);
     }
@@ -56,9 +56,9 @@ class OrderController {
       const result = await Order.create({
         userId,
         cartId,
-        statusOrder: "pending",
+        statusOrder: 'pending',
       });
-      return new SuccessResponse(res, 201, result, "Success");
+      return new SuccessResponse(res, 201, result, 'Success');
     } catch (error) {
       next(error);
     }
@@ -77,7 +77,7 @@ class OrderController {
           },
         }
       );
-      return new SuccessResponse(res, 200, result, "Success");
+      return new SuccessResponse(res, 200, result, 'Success');
     } catch (error) {
       next(error);
     }
@@ -87,7 +87,7 @@ class OrderController {
     try {
       const { id } = req.params;
       const result = await Order.destroy({ where: { id } });
-      return new SuccessResponse(res, 200, result, "Success");
+      return new SuccessResponse(res, 200, result, 'Success');
     } catch (error) {
       next(error);
     }

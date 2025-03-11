@@ -7,37 +7,37 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       userId: {
         type: Sequelize.INTEGER,
         onDelete: 'CASCADE',
         references: {
-          model: "Users",
-          key: "id",
-          as: "userId"
-        }
+          model: 'Users',
+          key: 'id',
+          as: 'userId',
+        },
       },
       productName: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       price: {
-        type: Sequelize.DOUBLE
+        type: Sequelize.DOUBLE,
       },
       categoryId: {
         type: Sequelize.INTEGER,
         onDelete: 'CASCADE',
         references: {
-          model: "Categories",
-          key: "id",
-          as: "categoryId"
-        }
+          model: 'Categories',
+          key: 'id',
+          as: 'categoryId',
+        },
       },
       size: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       color: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       // imageId: {
       //   type: Sequelize.INTEGER,
@@ -50,15 +50,15 @@ module.exports = {
       // },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('Items');
-  }
+  },
 };

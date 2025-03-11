@@ -1,8 +1,6 @@
 const cloudinary = require('../config/cloudinary');
 const multer = require('multer');
-const {
-  CloudinaryStorage,
-} = require('multer-storage-cloudinary');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
@@ -20,7 +18,7 @@ const storage = new CloudinaryStorage({
 const fileFilter = (req, file, cb) => {
   if (
     file.mimetype === 'image/jpeg' ||
-    file.mimetype === 'image/png' || 
+    file.mimetype === 'image/png' ||
     file.mimetype === 'image/jpg'
   ) {
     cb(null, true);

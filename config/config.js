@@ -1,4 +1,4 @@
-require("dotenv").config();
+require('dotenv').config();
 
 module.exports = {
   database: process.env.DB_NAME,
@@ -7,8 +7,7 @@ module.exports = {
   host: process.env.DB_HOST,
   port: parseInt(process.env.DB_PORT, 10),
   dialect: process.env.DB_DIALECT,
-  seederStorage: "sequelize",
-  seederStorageTableName: "SequelizeData",
+  seederStorage: 'sequelize',
+  seederStorageTableName: 'SequelizeData',
   db_url: process.env.DB_URL,
 };
-
