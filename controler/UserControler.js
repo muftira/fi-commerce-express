@@ -6,6 +6,7 @@ const {
   sequelize,
   Role,
   ImageUser,
+  ResetLink
 } = require('../models');
 const Validator = require('fastest-validator');
 const v = new Validator();
@@ -17,6 +18,8 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const SuccessResponse = require('../helpers/Success.helper');
 const ErrorResponse = require('../helpers/error.helper');
 const cloudinary = require('cloudinary').v2;
+const crypto = require("crypto");
+const sendResetPasswordEmail = require("../services/emailService");
 
 class UserController {
   async getUser(req, res, next) {
@@ -411,9 +414,66 @@ class UserController {
   async forgotPassword(req, res, next) {
     const { email } = req.body;
     try {
+      const user = await User.findOne({ where: { email } });
+      if (!user) {
+        throw new ErrorResponse(404, {}, 'Email Not Found');
+      }
+      const token = crypto.randomBytes(32).toString("hex");
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 15);
+      const resetResult = await ResetLink.findOne({ where: { userId: user.id } });
+      
+      if (resetResult) {
+        await ResetLink.update({ token, expiresAt, used: false, updatedAt: new Date() }, { where: { userId: user.id } });
+        
+      } else {
+        await ResetLink.create({ userId: user.id, email, token, expiresAt, used: false });
+
+      }
+      const _resetLink = `${process.env.BASE_URL_FRONTEND}/auth/resetPassword?token=${token}&email=${email}`;
+      const result = await sendResetPasswordEmail(email, _resetLink);
+      if (!result) {
+        throw new ErrorResponse(401, result, 'Failed to send reset password email');
+      }
+      return new SuccessResponse(res, 200, result, 'Reset password link sent to email.');
     } catch (error) {
       next(error);
     }
+  }
+
+  async resetPassword(req, res, next) {
+    const { token } = req.query;
+    const { email, newPassword } = req.body;
+    try {      
+      const user = await User.findOne({ where: { email } });
+      if (!user) {
+        throw new ErrorResponse(404, {}, 'Email not found');
+      }
+      const resetToken = await ResetLink.findOne({ where: { userId: user.id } });
+      if (!resetToken) {
+        throw new ErrorResponse(404, {}, 'Invalid or expired token');
+      }
+      if (new Date() > resetToken.expiresAt) {
+        throw new ErrorResponse(400, {}, 'Token has expired');
+      }
+      if (resetToken.used) {
+        throw new ErrorResponse(400, {}, 'Token has already been used');
+      }
+      const isValid = await ResetLink.findOne({ where: { token } });
+      if (!isValid) {
+        throw new ErrorResponse(400, {}, 'Invalid token');
+      }
+      const salt = bcrypt.genSaltSync(10);
+      const hash = bcrypt.hashSync(newPassword, salt);
+      await User.update({ password: hash }, { where: { email } });
+
+      await ResetLink.update({ used: true }, { where: { userId: user.id } });
+
+      return new SuccessResponse(res, 200, {}, 'Password has been reset successfully.');
+    } catch (error) {
+      next(error);
+    }
+
   }
 }
 
