@@ -14,14 +14,7 @@ class CartController {
           {
             model: Cart_item,
             as: 'ItemsProduct',
-            attributes: [
-              'id',
-              'itemId',
-              'cartId',
-              'quantity',
-              'createdAt',
-              'updatedAt',
-            ],
+            attributes: ['id', 'itemId', 'cartId', 'quantity', 'createdAt', 'updatedAt'],
             include: Item,
           },
         ],
@@ -48,14 +41,7 @@ class CartController {
   async getCart_item(req, res, next) {
     try {
       const result = await Cart_item.findAll({
-        attributes: [
-          'id',
-          'itemId',
-          'quantity',
-          'cartId',
-          'createdAt',
-          'updatedAt',
-        ],
+        attributes: ['id', 'itemId', 'quantity', 'cartId', 'createdAt', 'updatedAt'],
         include: [
           {
             model: Item,
@@ -76,14 +62,7 @@ class CartController {
       const { id } = req.params;
       const result = await Cart_item.findOne({
         where: { id },
-        attributes: [
-          'id',
-          'itemId',
-          'cartId',
-          'quantity',
-          'createdAt',
-          'updatedAt',
-        ],
+        attributes: ['id', 'itemId', 'cartId', 'quantity', 'createdAt', 'updatedAt'],
         include: [
           {
             model: Item,
@@ -149,10 +128,7 @@ class CartController {
     try {
       const { id } = req.params;
       const { quantityTotal, totalPrice } = req.body;
-      const result = await Cart.update(
-        { quantityTotal, totalPrice },
-        { where: { id } }
-      );
+      const result = await Cart.update({ quantityTotal, totalPrice }, { where: { id } });
       return new SuccessResponse(res, 200, result, 'Success');
     } catch (error) {
       next(error);

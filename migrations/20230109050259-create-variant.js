@@ -2,47 +2,39 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Items', {
+    await queryInterface.createTable('variants', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      userId: {
+      quantity: {
+        type: Sequelize.INTEGER,
+      },
+      option1: {
+        type: Sequelize.STRING,
+      },
+      option2: {
+        type: Sequelize.STRING,
+      },
+      price: {
+        type: Sequelize.INTEGER,
+      },
+      itemId: {
         type: Sequelize.INTEGER,
         onDelete: 'CASCADE',
         references: {
-          model: 'Users',
+          model: 'Items',
           key: 'id',
-          as: 'userId',
+          as: 'itemId',
         },
       },
-      productName: {
+      title: {
         type: Sequelize.STRING,
       },
-      itemCode: {
-        type: Sequelize.STRING,
-      },
-      numOrders: {
+      weight: {
         type: Sequelize.INTEGER,
-        defaultValue: 0,
-      },
-      description: {
-        type: Sequelize.STRING,
-      },
-      status: {
-        type: Sequelize.ENUM('active', 'inactive'),
-        defaultValue: 'inactive',
-      },
-      categoryId: {
-        type: Sequelize.INTEGER,
-        onDelete: 'CASCADE',
-        references: {
-          model: 'Categories',
-          key: 'id',
-          as: 'categoryId',
-        },
       },
       createdAt: {
         allowNull: false,
@@ -55,6 +47,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Items');
+    await queryInterface.dropTable('variants');
   },
 };

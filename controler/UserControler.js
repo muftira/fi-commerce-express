@@ -1,13 +1,4 @@
-const {
-  User,
-  Order,
-  Cart,
-  Item,
-  sequelize,
-  Role,
-  ImageUser,
-  ResetLink
-} = require('../models');
+const { User, Order, Cart, Item, sequelize, Role, ImageUser, ResetLink } = require('../models');
 const Validator = require('fastest-validator');
 const v = new Validator();
 const bcrypt = require('bcrypt');
@@ -18,8 +9,8 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const SuccessResponse = require('../helpers/Success.helper');
 const ErrorResponse = require('../helpers/error.helper');
 const cloudinary = require('cloudinary').v2;
-const crypto = require("crypto");
-const sendResetPasswordEmail = require("../services/emailService");
+const crypto = require('crypto');
+const sendResetPasswordEmail = require('../services/emailService');
 
 class UserController {
   async getUser(req, res, next) {
@@ -101,9 +92,7 @@ class UserController {
         // validate Email
         if (checkUser.dataValues.email == email.toLowerCase()) {
           if (req.file) {
-            const deletedImageUpload = cloudinary.uploader.destroy(
-              req.file.filename
-            );
+            const deletedImageUpload = cloudinary.uploader.destroy(req.file.filename);
           }
           throw new ErrorResponse(401, {}, 'Email Already Exist');
         } else {
@@ -214,10 +203,7 @@ class UserController {
         throw new ErrorResponse(401, {}, 'Email not Found');
       }
 
-      const checkPassword = bcrypt.compareSync(
-        password,
-        checkUser.dataValues.password
-      );
+      const checkPassword = bcrypt.compareSync(password, checkUser.dataValues.password);
 
       if (!checkPassword) {
         throw new ErrorResponse(401, {}, 'Wrong Password');
@@ -264,9 +250,7 @@ class UserController {
         // Validate Email
         if (checkUser.dataValues.email == email.toLowerCase()) {
           if (req.file) {
-            const deletedImageUpload = cloudinary.uploader.destroy(
-              req.file.filename
-            );
+            const deletedImageUpload = cloudinary.uploader.destroy(req.file.filename);
           }
           throw new ErrorResponse(401, {}, 'Email Already Exist');
         } else {
@@ -382,9 +366,7 @@ class UserController {
         throw new ErrorResponse(401, {}, 'User Not Found');
       }
       const checkImageUser = await ImageUser.findOne({ where: { userId: id } });
-      const deletedImageCloudinary = await cloudinary.uploader.destroy(
-        checkImageUser.cloudinaryId
-      );
+      const deletedImageCloudinary = await cloudinary.uploader.destroy(checkImageUser.cloudinaryId);
       const deletedImageUser = await ImageUser.destroy({
         where: { userId: id },
       });
@@ -418,17 +400,26 @@ class UserController {
       if (!user) {
         throw new ErrorResponse(404, {}, 'Email Not Found');
       }
-      const token = crypto.randomBytes(32).toString("hex");
+      const token = crypto.randomBytes(32).toString('hex');
       const expiresAt = new Date();
       expiresAt.setMinutes(expiresAt.getMinutes() + 15);
-      const resetResult = await ResetLink.findOne({ where: { userId: user.id } });
-      
-      if (resetResult) {
-        await ResetLink.update({ token, expiresAt, used: false, updatedAt: new Date() }, { where: { userId: user.id } });
-        
-      } else {
-        await ResetLink.create({ userId: user.id, email, token, expiresAt, used: false });
+      const resetResult = await ResetLink.findOne({
+        where: { userId: user.id },
+      });
 
+      if (resetResult) {
+        await ResetLink.update(
+          { token, expiresAt, used: false, updatedAt: new Date() },
+          { where: { userId: user.id } }
+        );
+      } else {
+        await ResetLink.create({
+          userId: user.id,
+          email,
+          token,
+          expiresAt,
+          used: false,
+        });
       }
       const _resetLink = `${process.env.BASE_URL_FRONTEND}/auth/resetPassword?token=${token}&email=${email}`;
       const result = await sendResetPasswordEmail(email, _resetLink);
@@ -444,12 +435,14 @@ class UserController {
   async resetPassword(req, res, next) {
     const { token } = req.query;
     const { email, newPassword } = req.body;
-    try {      
+    try {
       const user = await User.findOne({ where: { email } });
       if (!user) {
         throw new ErrorResponse(404, {}, 'Email not found');
       }
-      const resetToken = await ResetLink.findOne({ where: { userId: user.id } });
+      const resetToken = await ResetLink.findOne({
+        where: { userId: user.id },
+      });
       if (!resetToken) {
         throw new ErrorResponse(404, {}, 'Invalid or expired token');
       }
@@ -473,7 +466,6 @@ class UserController {
     } catch (error) {
       next(error);
     }
-
   }
 }
 

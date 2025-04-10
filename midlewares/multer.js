@@ -5,7 +5,7 @@ const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'tira-commerce',
+    folder: 'fi-commerce',
     format: async (req, file) => {
       'png', 'jpg', 'jpeg';
     }, // supports promises as well

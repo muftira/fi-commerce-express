@@ -21,11 +21,6 @@ router.put(
   upload.array('imageProduct', 3),
   itemController.updateItem
 );
-router.delete(
-  '/item/:id',
-  authentication,
-  adminRole,
-  itemController.deleteItem
-);
+router.delete('/item/:id', authentication, adminRole, itemController.deleteItem);
 
 module.exports = router;

@@ -49,10 +49,7 @@ class OrderController {
   async addOrder(req, res, next) {
     try {
       const { userId, cartId } = req.params;
-      const result2 = await Cart.update(
-        { statusCart: true },
-        { where: { id: cartId } }
-      );
+      const result2 = await Cart.update({ statusCart: true }, { where: { id: cartId } });
       const result = await Order.create({
         userId,
         cartId,

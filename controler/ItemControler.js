@@ -1,4 +1,5 @@
-const { Item, User, Category, ImageItem } = require('../models');
+const { Item, User, Category, ImageItem, Option, Value, Variant } = require('../models');
+const Models = require('../models');
 const SuccessResponse = require('../helpers/Success.helper');
 const ErrorResponse = require('../helpers/error.helper');
 const cloudinary = require('cloudinary').v2;
@@ -6,6 +7,8 @@ const cloudinary = require('cloudinary').v2;
 class ItemController {
   async getItem(req, res, next) {
     try {
+      console.log('model==>', Models);
+
       const result = await Item.findAll({
         include: [
           {
@@ -17,6 +20,15 @@ class ItemController {
           },
           {
             model: ImageItem,
+          },
+          {
+            model: Option,
+            include: [
+              {
+                model: Value,
+                attributes: ['id', 'name'],
+              },
+            ],
           },
         ],
       });
@@ -41,6 +53,13 @@ class ItemController {
           },
           {
             model: ImageItem,
+          },
+          {
+            model: Option,
+            include: [{ model: Value, attributes: ['id', 'name'] }],
+          },
+          {
+            model: Variant,
           },
         ],
       });
@@ -96,8 +115,7 @@ class ItemController {
     try {
       const { itemId } = req.params;
       const { categoryId } = req.query;
-      const { productName, price, categoryName, size, color, deletedImage } =
-        req.body;
+      const { productName, price, categoryName, size, color, deletedImage } = req.body;
       const findProduct = await Item.findOne({ where: { id: itemId } });
       const findCategory = await Category.findOne({
         where: { id: categoryId },
@@ -139,19 +157,13 @@ class ItemController {
           const parseDeletedImage = JSON.parse(validData);
           const imageStatus = await Promise.all(
             parseDeletedImage?.map((data, index) =>
-              ImageItem.update(
-                { statusDeleted: data.status },
-                { where: { id: data.id } }
-              )
+              ImageItem.update({ statusDeleted: data.status }, { where: { id: data.id } })
             )
           );
         } else {
           const imageStatus = await Promise.all(
             deletedImage.map((data, index) =>
-              ImageItem.update(
-                { statusDeleted: data.status },
-                { where: { id: data.id } }
-              )
+              ImageItem.update({ statusDeleted: data.status }, { where: { id: data.id } })
             )
           );
         }
@@ -162,9 +174,7 @@ class ItemController {
 
         if (findImage.length > 0) {
           const cloudinaryDeleted = await Promise.all(
-            findImage.map((data) =>
-              cloudinary.uploader.destroy(data.cloudinaryId)
-            )
+            findImage.map((data) => cloudinary.uploader.destroy(data.cloudinaryId))
           );
         }
 
@@ -204,9 +214,7 @@ class ItemController {
 
       if (findImage.length > 0) {
         const deletedCloudinary = await Promise.all(
-          findImage.map((image) =>
-            cloudinary.uploader.destroy(image.cloudinaryId)
-          )
+          findImage.map((image) => cloudinary.uploader.destroy(image.cloudinaryId))
         );
         const deletedDatabaseImageItem = await ImageItem.destroy({
           where: { itemId: id },

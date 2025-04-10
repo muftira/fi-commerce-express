@@ -32,10 +32,7 @@ const adminRole = async (req, res, next) => {
     const user = req.user;
 
     if (user.role !== 'admin') {
-      throw new ErrorResponse(
-        403,
-        "you don't have permission to access this resource"
-      );
+      throw new ErrorResponse(403, "you don't have permission to access this resource");
     }
 
     next();

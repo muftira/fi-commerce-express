@@ -23,16 +23,19 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'itemId',
       });
       Item.hasMany(models.ImageItem, { foreignKey: 'itemId' });
+      Item.hasMany(models.Option, { foreignKey: 'itemId' });
+      Item.hasMany(models.Variant, { foreignKey: 'itemId' });
     }
   }
   Item.init(
     {
       userId: DataTypes.INTEGER,
       productName: DataTypes.STRING,
-      price: DataTypes.DOUBLE,
       categoryId: DataTypes.INTEGER,
-      size: DataTypes.STRING,
-      color: DataTypes.STRING,
+      status: DataTypes.ENUM('active', 'inactive'),
+      description: DataTypes.STRING,
+      itemCode: DataTypes.STRING,
+      numOrders: DataTypes.INTEGER,
     },
     {
       sequelize,
