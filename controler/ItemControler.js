@@ -7,28 +7,13 @@ const cloudinary = require('cloudinary').v2;
 class ItemController {
   async getItem(req, res, next) {
     try {
-      console.log('model==>', Models);
-
       const result = await Item.findAll({
         include: [
-          {
-            model: User,
-            attributes: ['id', 'fullName', 'email', 'phone'],
-          },
           {
             model: Category,
           },
           {
             model: ImageItem,
-          },
-          {
-            model: Option,
-            include: [
-              {
-                model: Value,
-                attributes: ['id', 'name'],
-              },
-            ],
           },
         ],
       });
@@ -44,10 +29,6 @@ class ItemController {
       const result = await Item.findOne({
         where: { id },
         include: [
-          {
-            model: User,
-            attributes: ['id', 'fullName', 'email', 'phone'],
-          },
           {
             model: Category,
           },
@@ -72,7 +53,9 @@ class ItemController {
   async addItem(req, res, next) {
     try {
       const { userId } = req.query;
-      const { productName, price, categoryName, size, color } = req.body;
+      const { productName, categoryName, option, variant, itemCode, status, description } =
+        req.body;
+
       const findCategory = await Category.findOne({
         where: { categoryName: categoryName.toLowerCase() },
       });
@@ -84,14 +67,47 @@ class ItemController {
         });
       }
 
-      const result = await Item.create({
+      const product = await Item.create({
         userId,
         productName,
-        price,
         categoryId: findCategory ? findCategory.id : category.id,
-        size,
-        color,
+        itemCode,
+        status,
+        description,
       });
+
+      const optionParsed = JSON.parse(option);
+      await Promise.all(
+        optionParsed.map(async (data) => {
+          const _option = await Option.create({
+            itemId: product.id,
+            name: data.name,
+          });
+          data.value.map(async(value) =>
+            await Value.create({
+              optionId: _option.id,
+              name: value.name,
+            })
+          );
+        })
+      );
+
+      const variantParsed = JSON.parse(variant);
+      await Promise.all(
+        variantParsed.map((data) =>
+          Variant.create({
+            itemId: product.id,
+            option1: data.option1,
+            option2: data.option2,
+            price: data.price,
+            quantity: data.quantity,
+            weight: data.weight,
+            discount: data.discount,
+            compareAtPrice: data.discount,
+            title: `${data.option1} - ${data.option2}`,
+          })
+        )
+      );
 
       if (req.files) {
         await Promise.all(
@@ -99,13 +115,13 @@ class ItemController {
             ImageItem.create({
               cloudinaryId: file.filename,
               url: file.path,
-              itemId: result.id,
+              itemId: product.id,
             })
           )
         );
       }
 
-      return new SuccessResponse(res, 201, result, 'Success');
+      return new SuccessResponse(res, 201, product, 'Success');
     } catch (error) {
       next(error);
     }

@@ -21,10 +21,13 @@ module.exports = (sequelize, DataTypes) => {
       itemId: DataTypes.INTEGER,
       title: DataTypes.STRING,
       weight: DataTypes.INTEGER,
+      discount: DataTypes.INTEGER,
+      compareAtPrice: DataTypes.INTEGER,
     },
     {
       sequelize,
       modelName: 'Variant',
+      tableName: 'variants',
     }
   );
   return Variant;

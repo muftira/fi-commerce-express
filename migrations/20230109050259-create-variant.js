@@ -36,6 +36,14 @@ module.exports = {
       weight: {
         type: Sequelize.INTEGER,
       },
+      discount: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0,
+      },
+      compareAtPrice: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
