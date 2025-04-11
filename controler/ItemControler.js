@@ -83,7 +83,7 @@ class ItemController {
             itemId: product.id,
             name: data.name,
           });
-          data.value.map(async(value) =>
+          data.value.map(async (value) =>
             await Value.create({
               optionId: _option.id,
               name: value.name,
@@ -131,7 +131,7 @@ class ItemController {
     try {
       const { itemId } = req.params;
       const { categoryId } = req.query;
-      const { productName, price, categoryName, size, color, deletedImage } = req.body;
+      const { productName, categoryName, deletedImage, itemCode, status, description, option, variant } = req.body;
       const findProduct = await Item.findOne({ where: { id: itemId } });
       const findCategory = await Category.findOne({
         where: { id: categoryId },
@@ -158,14 +158,63 @@ class ItemController {
           },
         }
       );
-      const result = await Item.update(
-        { productName, price, categoryId: category.id, size, color },
+      const product = await Item.update(
+        { productName, categoryId: category.id, status, description, itemCode },
         {
           where: {
             id: itemId,
           },
         }
       );
+
+      const optionParsed = JSON.parse(option);
+      await Promise.all(
+        optionParsed.map(async (data) => {
+          const _option = await Option.update(
+            { name: data.name },
+            {
+              where: {
+                id: data.id,
+              }
+            })
+          await Promise.all(
+            data.value.map(async (value) =>
+              await Value.update(
+                { name: value.name },
+                {
+                  where: {
+                    id: value.id,
+                  },
+                }
+              )
+            )
+          )
+        }))
+
+        const variantParsed = JSON.parse(variant);
+        await Promise.all(
+            variantParsed.map((data) =>
+              Variant.update(
+                {
+                  option1: data.option1,
+                  option2: data.option2,
+                  price: data.price,
+                  quantity: data.quantity,
+                  weight: data.weight,
+                  discount: data.discount,
+                  compareAtPrice: data.discount,
+                  title: `${data.option1} - ${data.option2}`,
+                },
+                {
+                  where: {
+                    id: data.id,
+                  },
+                }
+              )
+            )
+          );
+        
+
 
       if (deletedImage) {
         if (typeof deletedImage == 'string') {
@@ -211,7 +260,7 @@ class ItemController {
         );
       }
 
-      return new SuccessResponse(res, 200, result, 'Success');
+      return new SuccessResponse(res, 200, product, 'Success');
     } catch (error) {
       next(error);
     }
