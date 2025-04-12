@@ -44,6 +44,10 @@ module.exports = {
           as: 'categoryId',
         },
       },
+      isDeleted: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

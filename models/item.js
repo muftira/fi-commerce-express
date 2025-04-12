@@ -36,6 +36,7 @@ module.exports = (sequelize, DataTypes) => {
       description: DataTypes.STRING,
       itemCode: DataTypes.STRING,
       numOrders: DataTypes.INTEGER,
+      isDeleted: DataTypes.BOOLEAN,
     },
     {
       sequelize,

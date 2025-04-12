@@ -370,7 +370,7 @@ class UserController {
       const deletedImageUser = await ImageUser.destroy({
         where: { userId: id },
       });
-      const result = await User.destroy({ where: { id } });
+      const result = await User.update({ isDeleted: true, updatedAt: new Date() }, { where: { id } });
       return new SuccessResponse(res, 200, result, 'Success');
     } catch (error) {
       next(error);
@@ -458,9 +458,9 @@ class UserController {
       }
       const salt = bcrypt.genSaltSync(10);
       const hash = bcrypt.hashSync(newPassword, salt);
-      await User.update({ password: hash }, { where: { email } });
+      await User.update({ password: hash, updatedAt: new Date() }, { where: { email } });
 
-      await ResetLink.update({ used: true }, { where: { userId: user.id } });
+      await ResetLink.update({ used: true, updatedAt: new Date() }, { where: { userId: user.id } });
 
       return new SuccessResponse(res, 200, {}, 'Password has been reset successfully.');
     } catch (error) {
