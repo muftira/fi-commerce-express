@@ -1,6 +1,5 @@
 const { Item, User, Category, ImageItem, Option, Value, Variant } = require('../models');
 const sequelize = require('../models');
-const Models = require('../models');
 const SuccessResponse = require('../helpers/Success.helper');
 const ErrorResponse = require('../helpers/error.helper');
 const cloudinary = require('cloudinary').v2;
