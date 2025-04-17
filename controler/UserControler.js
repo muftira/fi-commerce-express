@@ -11,29 +11,33 @@ const ErrorResponse = require('../helpers/error.helper');
 const cloudinary = require('cloudinary').v2;
 const crypto = require('crypto');
 const sendResetPasswordEmail = require('../services/emailService');
+const { where } = require('sequelize');
 
 class UserController {
   async getUser(req, res, next) {
     try {
-      const result = await User.findAll({
-        include: [
-          {
-            model: ImageUser,
-          },
-          {
-            model: Role,
-          },
-          {
-            model: Order,
-          },
-          {
-            model: Cart,
-            include: {
-              model: Item,
+      const result = await User.findAll(
+        {
+          include: [
+            {
+              model: ImageUser,
             },
-          },
-        ],
-      });
+            {
+              model: Role,
+            },
+            {
+              model: Order,
+            },
+            {
+              model: Cart,
+              include: {
+                model: Item,
+              },
+            },
+          ],
+        },
+        { where: { isDeleted: false } }
+      );
       if (!result) {
         throw new ErrorResponse(401, result, 'User is not found');
       }
@@ -46,26 +50,29 @@ class UserController {
   async getUserbyId(req, res, next) {
     try {
       const { id } = req.params;
-      const result = await User.findOne({
-        where: { id },
-        include: [
-          {
-            model: ImageUser,
-          },
-          {
-            model: Role,
-          },
-          {
-            model: Order,
-          },
-          {
-            model: Cart,
-            include: {
-              model: Item,
+      const result = await User.findOne(
+        {
+          where: { id },
+          include: [
+            {
+              model: ImageUser,
             },
-          },
-        ],
-      });
+            {
+              model: Role,
+            },
+            {
+              model: Order,
+            },
+            {
+              model: Cart,
+              include: {
+                model: Item,
+              },
+            },
+          ],
+        },
+        { where: { isDeleted: false } }
+      );
 
       if (!result) {
         throw new ErrorResponse(401, result, 'User is not found');
@@ -370,7 +377,10 @@ class UserController {
       const deletedImageUser = await ImageUser.destroy({
         where: { userId: id },
       });
-      const result = await User.update({ isDeleted: true, updatedAt: new Date() }, { where: { id } });
+      const result = await User.update(
+        { isDeleted: true, updatedAt: new Date() },
+        { where: { id } }
+      );
       return new SuccessResponse(res, 200, result, 'Success');
     } catch (error) {
       next(error);

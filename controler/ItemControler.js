@@ -1,15 +1,14 @@
-const { Item, User, Category, ImageItem, Option, Value, Variant } = require('../models');
-const sequelize = require('../models');
+const { Item, User, Category, ImageItem, Option, Value, Variant, sequelize } = require('../models');
 const SuccessResponse = require('../helpers/Success.helper');
 const ErrorResponse = require('../helpers/error.helper');
 const cloudinary = require('cloudinary').v2;
-const transaction = await sequelize.transaction();
-const { Op } = require('sequelize');
+const { Op, where } = require('sequelize');
 
 class ItemController {
   async getItem(req, res, next) {
     try {
       const result = await Item.findAll({
+        where: { isDeleted: false },
         include: [
           {
             model: Category,
@@ -29,7 +28,7 @@ class ItemController {
     try {
       const { id } = req.params;
       const result = await Item.findOne({
-        where: { id },
+        where: { [Op.and]: [{ id }, { isDeleted: false }] },
         include: [
           {
             model: Category,
@@ -53,6 +52,7 @@ class ItemController {
   }
 
   async addItem(req, res, next) {
+    const transaction = await sequelize.transaction();
     try {
       const { userId } = req.query;
       const { productName, categoryName, option, variant, itemCode, status, description } =
@@ -81,15 +81,22 @@ class ItemController {
       const optionParsed = JSON.parse(option);
       await Promise.all(
         optionParsed.map(async (data) => {
-          const _option = await Option.create({
-            itemId: product.id,
-            name: data.name,
-          }, { transaction });
-          data.value.map(async (value) =>
-            await Value.create({
-              optionId: _option.id,
-              name: value.name,
-            }, { transaction })
+          const _option = await Option.create(
+            {
+              itemId: product.id,
+              name: data.name,
+            },
+            { transaction }
+          );
+          data.value.map(
+            async (value) =>
+              await Value.create(
+                {
+                  optionId: _option.id,
+                  name: value.name,
+                },
+                { transaction }
+              )
           );
         })
       );
@@ -97,28 +104,34 @@ class ItemController {
       const variantParsed = JSON.parse(variant);
       await Promise.all(
         variantParsed.map((data) =>
-          Variant.create({
-            itemId: product.id,
-            option1: data.option1,
-            option2: data.option2,
-            price: data.price,
-            quantity: data.quantity,
-            weight: data.weight,
-            discount: data.discount,
-            compareAtPrice: data.discount,
-            title: `${data.option1} - ${data.option2}`,
-          }, { transaction })
+          Variant.create(
+            {
+              itemId: product.id,
+              option1: data.option1,
+              option2: data.option2,
+              price: data.price,
+              quantity: data.quantity,
+              weight: data.weight,
+              discount: data.discount,
+              compareAtPrice: data.discount,
+              title: `${data.option1} - ${data.option2}`,
+            },
+            { transaction }
+          )
         )
       );
 
       if (req.files) {
         await Promise.all(
           req.files.map((file) =>
-            ImageItem.create({
-              cloudinaryId: file.filename,
-              url: file.path,
-              itemId: product.id,
-            }, { transaction })
+            ImageItem.create(
+              {
+                cloudinaryId: file.filename,
+                url: file.path,
+                itemId: product.id,
+              },
+              { transaction }
+            )
           )
         );
       }
@@ -131,10 +144,20 @@ class ItemController {
   }
 
   async updateItem(req, res, next) {
+    const transaction = await sequelize.transaction();
     try {
       const { itemId } = req.params;
       const { categoryId } = req.query;
-      const { productName, categoryName, deletedImage, itemCode, status, description, option, variant } = req.body;
+      const {
+        productName,
+        categoryName,
+        deletedImage,
+        itemCode,
+        status,
+        description,
+        option,
+        variant,
+      } = req.body;
       const findProduct = await Item.findOne({ where: { id: itemId } });
       const findCategory = await Category.findOne({
         where: { id: categoryId },
@@ -162,7 +185,14 @@ class ItemController {
         }
       );
       const product = await Item.update(
-        { productName, categoryId: category.id, status, description, itemCode, updatedAt: new Date() },
+        {
+          productName,
+          categoryId: category.id,
+          status,
+          description,
+          itemCode,
+          updatedAt: new Date(),
+        },
         {
           where: {
             id: itemId,
@@ -178,22 +208,26 @@ class ItemController {
             {
               where: {
                 id: data.id,
-              }, transaction
-            })
+              },
+              transaction,
+            }
+          );
           await Promise.all(
-            data.value.map(async (value) =>
-              await Value.update(
-                { name: value.name, updatedAt: new Date() },
-                {
-                  where: {
-                    id: value.id,
-                  },
-                  transaction
-                }
-              )
+            data.value.map(
+              async (value) =>
+                await Value.update(
+                  { name: value.name, updatedAt: new Date() },
+                  {
+                    where: {
+                      id: value.id,
+                    },
+                    transaction,
+                  }
+                )
             )
-          )
-        }))
+          );
+        })
+      );
 
       const variantParsed = JSON.parse(variant);
       await Promise.all(
@@ -208,18 +242,17 @@ class ItemController {
               discount: data.discount,
               compareAtPrice: data.discount,
               title: `${data.option1} - ${data.option2}`,
-              updatedAt: new Date()
+              updatedAt: new Date(),
             },
             {
               where: {
                 id: data.id,
               },
-              transaction
+              transaction,
             }
           )
         )
       );
-
 
       if (deletedImage) {
         if (typeof deletedImage == 'string') {
@@ -227,13 +260,19 @@ class ItemController {
           const parseDeletedImage = JSON.parse(validData);
           const imageStatus = await Promise.all(
             parseDeletedImage?.map((data, index) =>
-              ImageItem.update({ statusDeleted: data.status, updatedAt: new Date() }, { where: { id: data.id }, transaction })
+              ImageItem.update(
+                { statusDeleted: data.status, updatedAt: new Date() },
+                { where: { id: data.id }, transaction }
+              )
             )
           );
         } else {
           const imageStatus = await Promise.all(
             deletedImage.map((data, index) =>
-              ImageItem.update({ statusDeleted: data.status, updatedAt: new Date() }, { where: { id: data.id }, transaction })
+              ImageItem.update(
+                { statusDeleted: data.status, updatedAt: new Date() },
+                { where: { id: data.id }, transaction }
+              )
             )
           );
         }
@@ -256,11 +295,14 @@ class ItemController {
       if (req.files) {
         const imageUpdate = await Promise.all(
           req.files.map((file) =>
-            ImageItem.create({
-              cloudinaryId: file.filename,
-              url: file.path,
-              itemId,
-            }, { transaction })
+            ImageItem.create(
+              {
+                cloudinaryId: file.filename,
+                url: file.path,
+                itemId,
+              },
+              { transaction }
+            )
           )
         );
       }
@@ -278,7 +320,11 @@ class ItemController {
       const { categoryId } = req.query;
       const findImage = await ImageItem.findAll({ where: { itemId: id } });
 
-      const findProduct = await Item.findOne({ where: { id } });
+      const findProduct = await Item.findOne({
+        where: {
+          [Op.and]: [{ id }, { isDeleted: false }],
+        },
+      });
 
       if (!findProduct) {
         throw new ErrorResponse(401, {}, 'Product not found');
@@ -292,19 +338,19 @@ class ItemController {
           where: { itemId: id },
         });
       }
-      const deletedDatabaseProduct = await Item.update({ isDeleted: true, updatedAt: new Date() }, { where: { id } });
+      const deletedDatabaseProduct = await Item.update(
+        { isDeleted: true, updatedAt: new Date() },
+        { where: { id } }
+      );
       const findCategory = await Item.findAll({
         where: {
-          [Op.and]: [
-            { categoryId },
-            { isDeleted: false }
-          ]
-        }
+          [Op.and]: [{ categoryId }, { isDeleted: false }],
+        },
       });
       if (findCategory.length == 0) {
         await Category.destroy({ where: { id: categoryId } });
       }
-      return new SuccessResponse(res, 200, deletedDatabaseProduct, 'Success');
+      return new SuccessResponse(res, 200, {}, 'Success');
     } catch (error) {
       next(error);
     }
