@@ -38,10 +38,18 @@ class ItemController {
           },
           {
             model: Option,
-            include: [{ model: Value, attributes: ['id', 'name'] }],
+            where: { isDeleted: false },
+            include: [
+              {
+                model: Value,
+                where: { isDeleted: false },
+                attributes: ['id', 'value', 'name', 'isDeleted'],
+              },
+            ],
           },
           {
             model: Variant,
+            where: { isDeleted: false },
           },
         ],
       });
