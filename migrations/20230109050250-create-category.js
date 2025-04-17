@@ -12,6 +12,10 @@ module.exports = {
       categoryName: {
         type: Sequelize.STRING,
       },
+      isDeleteed: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

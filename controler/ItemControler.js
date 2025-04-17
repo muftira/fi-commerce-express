@@ -85,6 +85,7 @@ class ItemController {
             {
               itemId: product.id,
               name: data.name,
+              isDeleted: data.isDeleted,
             },
             { transaction }
           );
@@ -93,7 +94,9 @@ class ItemController {
               await Value.create(
                 {
                   optionId: _option.id,
+                  value: value.value,
                   name: value.name,
+                  isDeleted: value.isDeleted,
                 },
                 { transaction }
               )
@@ -115,6 +118,7 @@ class ItemController {
               discount: data.discount,
               compareAtPrice: data.discount,
               title: `${data.option1} - ${data.option2}`,
+              isDeleted: data.isDeleted,
             },
             { transaction }
           )
@@ -204,7 +208,7 @@ class ItemController {
       await Promise.all(
         optionParsed.map(async (data) => {
           const _option = await Option.update(
-            { name: data.name, updatedAt: new Date() },
+            { name: data.name, updatedAt: new Date(), isDeleted: data.isDeleted },
             {
               where: {
                 id: data.id,
@@ -216,7 +220,12 @@ class ItemController {
             data.value.map(
               async (value) =>
                 await Value.update(
-                  { name: value.name, updatedAt: new Date() },
+                  {
+                    name: value.name,
+                    value: data.value,
+                    updatedAt: new Date(),
+                    isDeleted: value.isDeleted,
+                  },
                   {
                     where: {
                       id: value.id,
@@ -243,6 +252,7 @@ class ItemController {
               compareAtPrice: data.discount,
               title: `${data.option1} - ${data.option2}`,
               updatedAt: new Date(),
+              isDeleted: data.isDeleted,
             },
             {
               where: {
@@ -348,7 +358,7 @@ class ItemController {
         },
       });
       if (findCategory.length == 0) {
-        await Category.destroy({ where: { id: categoryId } });
+        await Category.update({ isDeleted: true }, { where: { id: categoryId } });
       }
       return new SuccessResponse(res, 200, {}, 'Success');
     } catch (error) {
