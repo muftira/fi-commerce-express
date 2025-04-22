@@ -203,7 +203,7 @@ class UserController {
       const { email, password } = req.body;
       const checkUser = await User.findOne({
         where: { email: email.toLowerCase() },
-        include: { model: Role },
+        include: [{ model: ImageUser }, { model: Role }],
       });
 
       if (!checkUser) {
