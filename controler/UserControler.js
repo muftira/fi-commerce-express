@@ -87,7 +87,7 @@ class UserController {
   async addUser(req, res, next) {
     try {
       const { fullName, email, password, address, phone, roleName } = req.body;
-      const checkUser = await User.findOne({ where: { email } });
+      const checkUser = await User.findOne({ where: { email: email.toLowerCase() } });
       const schema = {
         email: { type: 'email', optional: false },
         password: { type: 'string', min: 5, max: 255, optional: false },
@@ -109,7 +109,7 @@ class UserController {
           if (validationResult !== true) {
             throw new ErrorResponse(401, validationResult, 'Validation Failed');
           } else {
-            const checkRole = await Role.findOne({ where: { roleName } });
+            const checkRole = await Role.findOne({ where: { roleName: roleName.toLowerCase() } });
             if (checkRole) {
               const result = await User.create({
                 fullName,
@@ -129,7 +129,7 @@ class UserController {
               return new SuccessResponse(res, 200, result, 'Success');
             }
 
-            const role = await Role.create({ roleName });
+            const role = await Role.create({ roleName: roleName.toLowerCase() });
             const result = await User.create({
               fullName,
               email: email.toLowerCase(),
@@ -155,7 +155,7 @@ class UserController {
         if (validationResult !== true) {
           throw new ErrorResponse(401, validationResult, 'Validation Failed');
         } else {
-          const checkRole = await Role.findOne({ where: { roleName } });
+          const checkRole = await Role.findOne({ where: { roleName: roleName.toLowerCase() } });
           if (checkRole) {
             const result = await User.create({
               fullName,
@@ -174,7 +174,7 @@ class UserController {
             }
             return new SuccessResponse(res, 201, result, 'Success');
           }
-          const role = await Role.create({ roleName });
+          const role = await Role.create({ roleName: roleName.toLowerCase() });
           const result = await User.create({
             fullName,
             email: email.toLowerCase(),
@@ -391,7 +391,7 @@ class UserController {
     const { email } = req.query;
     try {
       const result = await User.findOne({
-        where: { email },
+        where: { email: email.toLowerCase() },
         attributes: ['email'],
       });
       if (!result) {
@@ -406,7 +406,7 @@ class UserController {
   async forgotPassword(req, res, next) {
     const { email } = req.body;
     try {
-      const user = await User.findOne({ where: { email } });
+      const user = await User.findOne({ where: { email: email.toLowerCase() } });
       if (!user) {
         throw new ErrorResponse(404, {}, 'Email Not Found');
       }
@@ -425,14 +425,14 @@ class UserController {
       } else {
         await ResetLink.create({
           userId: user.id,
-          email,
+          email: email.toLowerCase(),
           token,
           expiresAt,
           used: false,
         });
       }
-      const _resetLink = `${process.env.BASE_URL_FRONTEND}/auth/resetPassword?token=${token}&email=${email}`;
-      const result = await sendResetPasswordEmail(email, _resetLink);
+      const _resetLink = `${process.env.BASE_URL_FRONTEND}/auth/resetPassword?token=${token}&email=${email.toLowerCase()}`;
+      const result = await sendResetPasswordEmail(email.toLowerCase(), _resetLink);
       if (!result) {
         throw new ErrorResponse(401, result, 'Failed to send reset password email');
       }
@@ -446,7 +446,7 @@ class UserController {
     const { token } = req.query;
     const { email, newPassword } = req.body;
     try {
-      const user = await User.findOne({ where: { email } });
+      const user = await User.findOne({ where: { email: email.toLowerCase() } });
       if (!user) {
         throw new ErrorResponse(404, {}, 'Email not found');
       }
@@ -468,7 +468,7 @@ class UserController {
       }
       const salt = bcrypt.genSaltSync(10);
       const hash = bcrypt.hashSync(newPassword, salt);
-      await User.update({ password: hash, updatedAt: new Date() }, { where: { email } });
+      await User.update({ password: hash, updatedAt: new Date() }, { where: { email: email.toLowerCase() } });
 
       await ResetLink.update({ used: true, updatedAt: new Date() }, { where: { userId: user.id } });
 
